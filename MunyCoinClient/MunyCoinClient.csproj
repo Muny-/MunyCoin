@@ -9,4 +9,7 @@
       <Name>LibMunyCoin</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="PureWebsockets" Version="2.0.1" />
+  </ItemGroup>
 </Project>
