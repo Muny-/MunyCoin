@@ -8,7 +8,7 @@ using vtortola.WebSockets.Rfc6455;
 
 namespace LibMunyCoin
 {
-    class MNCClient
+    class MKNClient
     {
         WebSocketClient client;
         CancellationTokenSource cancellation;
@@ -16,7 +16,7 @@ namespace LibMunyCoin
         List<WebSocket> webSockets = new List<WebSocket>();
 
         
-        public MNCClient()
+        public MKNClient()
         {
 
             cancellation = new CancellationTokenSource();

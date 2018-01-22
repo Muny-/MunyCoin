@@ -6,17 +6,17 @@ namespace LibMunyCoin
 {
     public class MunyCoin
     {
-        MNCServer server;
+        MKNServer server;
 
-        MNCClient client;
+        MKNClient client;
 
         public MunyCoin()
         {
             int randPort = new Random().Next(1000, 65535);
 
-            server = new MNCServer(randPort);
+            server = new MKNServer(randPort);
 
-            client = new MNCClient();
+            client = new MKNClient();
             
             var webSocket = client.Connect("ws://coin.muny.us:" + randPort);
 

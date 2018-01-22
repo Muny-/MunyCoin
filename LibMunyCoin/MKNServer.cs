@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using vtortola.WebSockets;
@@ -9,14 +11,14 @@ using vtortola.WebSockets.Rfc6455;
 
 namespace LibMunyCoin
 {
-    class MNCServer
+    class MKNServer
     {
         private CancellationTokenSource cancellation;
         private WebSocketListener server;
 
         Task acceptingTask;
 
-        public MNCServer(int port)
+        public MKNServer(int port)
         {
             Console.WriteLine("Starting Echo Server");
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
@@ -62,8 +64,7 @@ namespace LibMunyCoin
 
             server.StartAsync().Wait();
 
-            Console.WriteLine("Echo Server listening: " + string.Join(", ", Array.ConvertAll(listenEndPoints, e => e.ToString())) + ".");
-            Console.WriteLine("You can test echo server at http://www.websocket.org/echo.html.");
+            Console.WriteLine("Server listening: " + string.Join(", ", Array.ConvertAll(listenEndPoints, e => e.ToString())) + ".");
 
             acceptingTask = AcceptWebSocketsAsync(server, cancellation.Token);
         }
@@ -78,7 +79,7 @@ namespace LibMunyCoin
         }
 
 
-        private static async Task AcceptWebSocketsAsync(WebSocketListener server, CancellationToken cancellation)
+        private async Task AcceptWebSocketsAsync(WebSocketListener server, CancellationToken cancellation)
         {
             await Task.Yield();
 
@@ -113,7 +114,7 @@ namespace LibMunyCoin
             Console.WriteLine("Server has stopped accepting new clients.");
         }
 
-        private static async Task HandleAllIncomingMessagesAsync(WebSocket webSocket, CancellationToken cancellation)
+        private async Task HandleAllIncomingMessagesAsync(WebSocket webSocket, CancellationToken cancellation)
         {
             Console.WriteLine($"Client '{webSocket.RemoteEndpoint}' connected.");
             try
@@ -122,6 +123,19 @@ namespace LibMunyCoin
                 {
                     try
                     {
+                        var messageReadStream = await webSocket.ReadMessageAsync(cancellation);
+
+                        if(messageReadStream.MessageType == WebSocketMessageType.Text)
+                        {
+                            String msgContent = String.Empty;
+                            using (var reader = new StreamReader(messageReadStream, Encoding.UTF8))
+                                    msgContent = await reader.ReadToEndAsync();
+                        }
+                        else if (messageReadStream.MessageType == WebSocketMessageType.Binary)
+                        {
+                            // send to munycoin.cs
+                        }
+                        
                         var messageText = await webSocket.ReadStringAsync(cancellation).ConfigureAwait(false);
                         if (messageText == null)
                             break; // webSocket is disconnected
@@ -148,11 +162,11 @@ namespace LibMunyCoin
             }
         }
 
-        private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
             Console.WriteLine("Unobserved Exception: ", e.Exception);
         }
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Console.WriteLine("Unhandled Exception: ", e.ExceptionObject as Exception);
         }
